@@ -1,17 +1,91 @@
 var details_opened = true;
+var input;
 /**
  * Function to hide or show the details tab on the right
  * depending on the actual state
  */
 
 $('#arrow').click(function(){
-	$(this)
-		.css('transform', function(){ return details_opened ? 'rotate(0deg)' : 'rotate(180deg)'})
+	toggleDetails();
+
+});
+
+function toggleDetails(){
+	$('#arrow').css('transform', function(){ return details_opened ? 'rotate(0deg)' : 'rotate(180deg)'})
 	
 	$('#details').css('right', function(){ return details_opened ? '-480px' : '0'});
 	details_opened = !details_opened;
+}
 
-});
+function findNodeAndParents(node){
+	console.log(node.name);
+	
+	var children_found = false;
+
+	// Iterate the children and _children (hidden ones)
+	if (node.children || node._children){
+		var children = node.children ? node.children : node._children; 
+		
+		for (var i = 0; i < children.length; i++){
+			if (findNodeAndParents(children[i])){
+				children_found = true;
+			}
+		}
+		if (children_found){
+			openNode(node);
+			
+		}else{
+			collapseNode(node);
+		}
+	}
+	/**
+	 * Then check if the current node's name match the input partially or fully.
+	 * If it matches, then it will be added to the stack. Due to the nature of this
+	 * algorithm the first nodes to be checked are the leaves and then their parents.
+	 *
+	 * If it does not match, then it must return the value of children_found, in order
+	 * to open push the parents to the stack as well.
+	 */
+	
+	if (doesNodeNameContainInput(node)){
+		
+		openNode(node);
+		
+		return true;
+
+	}else{
+		return children_found;
+	}
+	
+}
+
+
+
+/**
+ * node._children is used to collapse the children of that parent, so in this case
+ * it is necessary to get these ._children to the .children attribute.
+ */
+
+function openNode(node){
+	if(node._children){
+		node.children = node._children;
+		node._children = null;	
+	}
+}
+
+function collapseNode(node){
+	if(node.children){
+		node._children = node.children;
+		node.children = null;	
+	}
+}
+
+function doesNodeNameContainInput(node){
+	if (node.name.toLowerCase().indexOf(input.toLowerCase()) >= 0)
+		return true;
+	else
+		return false;
+}
 
 /**
  *  This function will catch the event of a user changing the input #filter
@@ -19,13 +93,26 @@ $('#arrow').click(function(){
  *  the string typed. If it matches, then it is added in order for it to work to deeper levels. 
  */
 d3.select('#filter').on('input', function(){
-	var input = String(this.value);
+	input = String(this.value);
+	if (input == ''){
+		input = 'eReefs';
+	}
+
 	var parents = []
 	var broader_matches = 0;
 
-	text.style('opacity', '0');
-	text.filter(function(d){
+	findNodeAndParents(root);
+	update(root);
+	//call update on the stack
+
+	var circle = d3.selectAll('g circle');
+	circle.classed('filtered', false);
+	circle.filter(function(d){
+		if (input == '' || input == 'eReefs')
+			return false;
+
 		if(d.name.toLowerCase().indexOf(input.toLowerCase()) >= 0){
+			console.log(d);
 			if(parents.indexOf(d.name.toLowerCase) < 0){
 				parents.push(d.name.toLowerCase());
 				broader_matches++;
@@ -41,35 +128,56 @@ d3.select('#filter').on('input', function(){
 		}
 		
 		return false;
-	}).style('opacity', '1');
-	console.log(parents)
+	}).classed('filtered', true);
 
-	
+	console.log('parents'+parents)
 
-	circle.style('opacity', '0.2');
-	var a = circle.filter(function(d){
-		if(d.name.toLowerCase().indexOf(input.toLowerCase()) >= 0){
-			// d.style('fill-opacity', 1);
+	var text = d3.selectAll('g text');
+	text.style('opacity', '0.6');
+	text.filter(function(d){
+		
+		if(d.name.toLowerCase().indexOf(input.toLowerCase()) >= 0){			
 			return true;
 		}
 		if (d.parent !== undefined){
-			if (parents.indexOf(d.parent.name) >= 0){
+			if (parents.indexOf(d.parent.name) >= 0){ 
 				return true;
 			}	
 		}
+		
 		return false;
 	}).style('opacity', '1');
+	
 
-	console.log(a);
+	// circle.style('opacity', '0.2');
+	// var a = circle.filter(function(d){
+	// 	if(d.name.toLowerCase().indexOf(input.toLowerCase()) >= 0){
+	// 		// d.style('fill-opacity', 1);
+	// 		return true;
+	// 	}
+	// 	if (d.parent !== undefined){
+	// 		if (parents.indexOf(d.parent.name) >= 0){
+	// 			return true;
+	// 		}	
+	// 	}
+	// 	return false;
+	// }).style('opacity', '1');
+
+	// console.log(a);
 	if (broader_matches == 1 || parents.length == 1){
-		zoom(a.datum());	
+		//zoom(a.datum());	
 	}else{
-		zoom(root_global);
+		//zoom(root_global);
 	}
 	
 	
 });
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
+
+/**
+ * Prepare the tree to be built
+ */
+
+var margin = {top: 20, right: 80, bottom: 20, left: 80},
     width = 960 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
 
@@ -117,12 +225,11 @@ function update(source) {
       links = tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 230; });
+  nodes.forEach(function(d) { d.y = d.depth * 180; });
 
-  // Update the nodes…
+  // Update the nodes.
   var node = svg.selectAll("g.node")
       .data(nodes, function(d) { return d.id || (d.id = ++i); });
-
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
       .attr("class", "node")
@@ -132,7 +239,7 @@ function update(source) {
 
   nodeEnter.append("circle")
       .attr("r", 1e-6)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+      .style("fill", function(d) { return d._children ? "rgb(48, 180, 136);" : "#fff"; });
 
   nodeEnter.append("text")
       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
@@ -148,67 +255,75 @@ function update(source) {
 
   nodeUpdate.select("circle")
       .attr("r", 4.5)
-      .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+      .style("fill", function(d) { return d._children ? "rgb(48, 180, 136);" : "#fff"; });
 
   nodeUpdate.select("text")
       .style("fill-opacity", 1);
 
   // Transition exiting nodes to the parent's new position.
-  var nodeExit = node.exit().transition()
-      .duration(duration)
-      .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
-      .remove();
+  	var nodeExit = node.exit().transition()
+		.duration(duration)
+		.attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+		.remove();
 
-  nodeExit.select("circle")
-      .attr("r", 1e-6);
+	nodeExit.select("circle")
+		.attr("r", 1e-6);
 
-  nodeExit.select("text")
-      .style("fill-opacity", 1e-6);
+	nodeExit.select("text")
+		.style("fill-opacity", 1e-6);
 
   // Update the links…
-  var link = svg.selectAll("path.link")
-      .data(links, function(d) { return d.target.id; });
+	var link = svg.selectAll("path.link")
+		.data(links, function(d) { return d.target.id; });
 
   // Enter any new links at the parent's previous position.
-  link.enter().insert("path", "g")
-      .attr("class", "link")
-      .attr("d", function(d) {
-        var o = {x: source.x0, y: source.y0};
-        return diagonal({source: o, target: o});
-      });
+	link.enter().insert("path", "g")
+		.attr("class", "link")
+		.attr("d", function(d) {
+			var o = {x: source.x0, y: source.y0};
+			return diagonal({source: o, target: o});
+		});
 
   // Transition links to their new position.
-  link.transition()
-      .duration(duration)
-      .attr("d", diagonal);
+	link.transition()
+		.duration(duration)
+		.attr("d", diagonal);
 
   // Transition exiting nodes to the parent's new position.
-  link.exit().transition()
-      .duration(duration)
-      .attr("d", function(d) {
-        var o = {x: source.x, y: source.y};
-        return diagonal({source: o, target: o});
-      })
-      .remove();
+	link.exit().transition()
+		.duration(duration)
+		.attr("d", function(d) {
+			var o = {x: source.x, y: source.y};
+			return diagonal({source: o, target: o});
+		})
+		.remove();
 
   // Stash the old positions for transition.
-  nodes.forEach(function(d) {
-    d.x0 = d.x;
-    d.y0 = d.y;
-  });
+	nodes.forEach(function(d) {
+		d.x0 = d.x;
+		d.y0 = d.y;
+	});
 }
 
 // Toggle children on click.
-function click(d) {
-  if (d.children) {
-    d._children = d.children;
-    d.children = null;
-  } else {
-    d.children = d._children;
-    d._children = null;
-    d3.select('#content').html('<p>Some information about <strong>' + d.name + '</strong></p>');
-  }
-  update(d);
+function click(d){
+ 	if (d.children){
+		d._children = d.children;
+		d.children = null;
+	}else{
+		d.children = d._children;
+		d._children = null;
+	}
+	d3.select('#content').html('<p>Some information about <strong>' + d.name + '</strong></p>');
+
+	if(!d.children && !d._children){
+
+		
+		if (!details_opened){
+			toggleDetails();
+		}
+	}
+	update(d);
 }
 
 
@@ -293,6 +408,7 @@ function navigate(object){
 		return current_object;
 
 	}else{
+		console.log(object);
 		return null 
 	}
 }
@@ -323,7 +439,7 @@ function cluster(children){
 			var end = begin+MAX_CHILDREN-1;
 			
 			end = end < children.length ? end : children.length-1; // check to avoid inexistent position
-			group['name'] = children[begin].name.charAt(0).toUpperCase()+'-'+children[end].name.charAt(0).toUpperCase(); // creates the name for the cluster
+			group['name'] = children[begin].name.charAt(0).toUpperCase()+'-'+children[end].name.charAt(0).toUpperCase() + ' Group'; // creates the name for the cluster
 			group['children'] = children.slice(begin, end+1); //make a copy of the array
 			group['children'].sort(function(a, b){
 				if (a.name < b.name)

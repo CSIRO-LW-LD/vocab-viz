@@ -4,7 +4,8 @@ body, html{
 	height: 100%;
 	width: 100%;
 	margin: 0;
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .node {
@@ -13,7 +14,7 @@ body, html{
 
 .node circle {
   fill: #fff;
-  stroke: steelblue;
+  stroke: rgb(48, 180, 136);
   stroke-width: 1.5px;
 }
 
@@ -25,6 +26,11 @@ body, html{
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
+}
+
+.filtered{
+	fill: #ff973e !important;
+	stroke: #ff973e !important;
 }
 
 #filter{
