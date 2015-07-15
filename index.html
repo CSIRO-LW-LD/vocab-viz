@@ -3,13 +3,20 @@
 	<meta charset="utf-8">
 	<title>eReefs - Exploration</title>
 
-	<link rel="stylesheet" href="css/style.css"></style>
+	<link rel="stylesheet" href="css/style.css" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
 </head>
 
 <body>
 	
 	<div id="details">
-		<input type="text" id="filter" placeholder="Type to filter elements: e.g. Chlorophyle" />
+		<div class="input-group" style="position: absolute;">
+			<input type="text" id="filter" class="form-control" placeholder="Filter the elements">
+			<span class="input-group-btn">
+				<button class="btn btn-primary" id="filter_button" type="button"><span class="glyphicon glyphicon-search"></span></button>
+			</span>
+	    </div>
+		<!-- <input type="search" class="form-control" id="filter" placeholder="Type to filter elements: e.g. Chlorophyle" /> -->
 		<h2>Details</h2>
 		<div id="content">
 			<p>The visualisation on the left will help you to <strong>explore</strong> all the features and information available in eReefs</p>
@@ -24,7 +31,9 @@
 	<!-- which will be added to the body as an SVG element -->
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	
 	<script src="js/jquery-2.1.4.js"></script>
+	<script src="js/bootstrap.min.js"></script>
 	<script src="js/main.js"></script>
 
 

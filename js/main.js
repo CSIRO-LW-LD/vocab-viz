@@ -92,8 +92,16 @@ function doesNodeNameContainInput(node){
  *  a list of parents will be created in order to identify which are the parents that match
  *  the string typed. If it matches, then it is added in order for it to work to deeper levels. 
  */
-d3.select('#filter').on('input', function(){
-	input = String(this.value);
+// d3.select('#filter').on('input', function(){
+d3.select('#filter_button').on('click', filterElementByInput)
+d3.select('body').on('keydown', filterElementByInput);
+
+function filterElementByInput(){
+	input = String(d3.select('#filter').property('value'));
+	console.log(d3.event.keyCode);
+	if(d3.event.keyCode != 13 && d3.event.keyCode != 0){
+		return false;
+	}
 	if (input == ''){
 		input = 'eReefs';
 	}
@@ -171,7 +179,7 @@ d3.select('#filter').on('input', function(){
 	}
 	
 	
-});
+}
 
 /**
  * Prepare the tree to be built
