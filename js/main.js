@@ -224,7 +224,17 @@ function update(source) {
 
   nodeEnter.append("circle")
       .attr("r", 1e-6)
-      .style("fill", function(d) { return d._children ? "rgb(48, 180, 136);" : "#fff"; });
+      .style("fill", function(d) {
+
+      	if(d.name.indexOf(' Group') >= 0){
+  			return "rgb(85, 165, 255);";
+  		}
+      	if (d._children){
+      		return "rgb(48, 180, 136);";
+      	}
+      	return '#fff';
+      
+      });
 
   nodeEnter.append("text")
       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
@@ -240,7 +250,17 @@ function update(source) {
 
   nodeUpdate.select("circle")
       .attr("r", 4.5)
-      .style("fill", function(d) { return d._children ? "rgb(48, 180, 136);" : "#fff"; });
+      .style("fill", function(d) {
+
+      	if(d.name.indexOf(' Group') >= 0){
+  			return "rgb(85, 165, 255);";
+  		}
+      	if (d._children){
+      		return "rgb(48, 180, 136);";
+      	}
+      	return '#fff';
+      
+      });
 
   nodeUpdate.select("text")
       .style("fill-opacity", 1);
@@ -374,6 +394,8 @@ function prepareData(data){
 
 	console.dir(data_processed);
 	initialise(data_processed, null);
+
+
 }
 
 /**
@@ -484,5 +506,5 @@ function cluster(children){
 		return children;	
 	}
 	
-}
+	}
 
