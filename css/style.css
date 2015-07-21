@@ -3,6 +3,7 @@
 body, html{
 	height: 100%;
 	width: 100%;
+	max-width: 100%;
 	margin: 0;
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -33,6 +34,12 @@ body, html{
 	stroke: #ff973e !important;
 }
 
+#visualisation{
+	width: auto;
+	height: 100%;
+	overflow: auto;
+}
+
 #filter{
 	display: block;
 	outline-style: none;
@@ -43,35 +50,25 @@ body, html{
 	border: 0;
 	text-align: center;
 	border-bottom: 1px solid #EFEFEF;
-	background-color: #FFFFFF;
+	border-left: 1px solid #efefef;
+	background-color: rgba(247, 247, 247, 0.79);
 	padding: 15px 10px;
 	box-sizing: border-box;
-	box-shadow: inset 0px 0px 10px -5px rgba(0, 0, 0, 0.42);
 	transition: all 0.5s;
-}
-
-#filter:focus{
-	/*box-shadow: inset 0px 0px 10px -2px  rgba(116, 213, 215, 1);*/
-	border-bottom: 1px solid rgba(78, 174, 216, 0.73);
-}
-
-#filter_button{
-	height: 45px;
-	width: 60px;
-	border-radius: 0;
 }
 
 #details{
 	width: 500px;
 	height: 100%;
-	position: absolute;
-	right: 0;
-	top: 0;
+	position: relative;
+	float: right;
 	background: #fff;
-	border-left: 1px solid rgba(46, 165, 138, 0.28);
+	box-shadow: 0px 0 15px -4px rgba(0, 0, 0, 0.17);
 	z-index: 1;
 	font-family: 'Open Sans', sans-serif;
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
+	word-wrap: break-word;
 	transition: 0.3s ease-in-out;
 	padding-bottom: 10px;
 }
@@ -83,13 +80,84 @@ body, html{
 	text-align: center;
 	padding-bottom: 15px;
 	width: 90%;
-	margin: 65px auto 20px auto;
+	margin: 65px auto 0px auto;
 	border-bottom: 1px solid #ececec;
+}
+
+#filter:focus{
+	box-shadow: none;
+	border-bottom: 1px solid rgba(78, 174, 216, 0.73);
+}
+
+#filter_button{
+	height: 45px;
+	width: 60px;
+	border-radius: 0;
 }
 
 #details #content{
 	padding: 10px 25px;
 }
+
+#details a{
+	color: #15B59C;
+	transition: all 0.2s;
+}
+
+#details a:hover{
+	color: #337AB7 !important;
+	text-decoration: none;
+}
+
+#details a:hover{
+	color: #15B59C;
+
+}
+
+.dispUri {
+	padding-top: 0px;
+	padding-bottom: 20px;
+}
+
+.skoslabel li{
+	display: inline-block;
+	margin: 0px;
+	line-height: 20px;
+}
+
+.skoslabel li:first-letter{
+	text-transform: uppercase;
+}
+
+h3.title{
+	font-size: 1.8em;
+	font-weight: 300;
+}
+
+h3.title:first-letter{
+	text-transform: uppercase;
+}
+
+ul.skoslabel{
+	padding-left: 0;
+}
+
+.skoslabel li:after{
+	content: " / ";
+}
+
+li{
+	list-style: none;
+}
+
+.resProp{
+	line-height: 1.7;
+}
+.resprop-field{
+	font-weight: bold;
+	text-transform: capitalize;
+}
+
 
 #details strong{
 	color: #3cbd98;

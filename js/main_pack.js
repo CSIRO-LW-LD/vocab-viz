@@ -19,6 +19,7 @@ var pack,
 	text,
 	details_opened = true;
 
+
 initialiseOrUpdate();
 
 /**
@@ -229,7 +230,7 @@ $.get(
 );
 
 function prepareData(data){
-	console
+
 	var data_processed = {'name': 'eReefs', 'children': []};
 
 	for(var i = 0; i < data['result']['items'].length; i++){
@@ -239,8 +240,9 @@ function prepareData(data){
 		}else{
 			console.log(data['result']['items'][i]);
 		}
-
 	}
+
+
 
 	console.dir(data_processed);
 	initialiseWithData(null, data_processed);
@@ -258,8 +260,24 @@ function navigate(object){
 		return null;
 	}
 	if ('prefLabel' in object){
-		var current_object = {'name': object['prefLabel'], 'children': []};
+		
+		/**
+		 * Generate the name correctly depending if it is an array or an single string
+		 */
+		var name;
+		if (typeof object['prefLabel'] === 'string' || object['prefLabel'] instanceof String){
+			name = object['prefLabel'];
+		}else{
+			name = object['prefLabel'].join(', ');
+		}
 
+		var current_object = {'name': name, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
+
+		/**
+		 * if the element has member (children), then it will call the method recursively
+		 * and then with the children done it will push the children and its children to
+		 * the array.
+		 */
 		if('member' in object){
 			for(var j = 0; j < object['member'].length; j++){
 				var child = navigate(object['member'][j]);
@@ -271,13 +289,73 @@ function navigate(object){
 		}
 		if (current_object['children'].length == 0){
 			delete current_object['children'];
+		}else{
+			
+
+			current_object['children'] = cluster(current_object['children']);
 		}
+
 		return current_object;
 
 	}else{
+		console.log(object);
 		return null 
 	}
 }
 
+/**
+ * Function to cluster information when there are too many children inside
+ * a single node.
+ */
+
+function cluster(children){
+	var MAX_CHILDREN = 14;
+	var result = [];
+	children.sort(function(a, b){
+				if (a.name < b.name)
+					return -1;
+				if (a.name > b.name)
+					return 1;
+				return 0;
+			});
+	if (children.length > MAX_CHILDREN){
+		var parents = Math.ceil(children.length/MAX_CHILDREN); // get how many parents there will be.
+		
+		
+
+		for (var i = 0; i < parents; i++){ // for each parent, create its children
+			var group = {};
+			var begin = i*MAX_CHILDREN;
+			var end = begin+MAX_CHILDREN-1;
+			
+			end = end < children.length ? end : children.length-1; // check to avoid inexistent position
+			group['name'] = children[begin].name.charAt(0).toUpperCase()+'-'+children[end].name.charAt(0).toUpperCase() + ' Group'; // creates the name for the cluster
+			group['children'] = children.slice(begin, end+1); //make a copy of the array
+			group['children'].sort(function(a, b){
+				if (a.name < b.name)
+					return -1;
+				if (a.name > b.name)
+					return 1;
+				return 0;
+			});
+			// console.log(children[begin].name);
+			// console.log(children[end].name);
+			// console.log(group);
+			result.push(group);
+		}
+		
+		// Cluster the cluster of parents when there are more than the maximum allowed.
+		if (parents > MAX_CHILDREN){
+			result = cluster(result);
+		}
+
+		return result;
+
+
+	}else{
+		return children;	
+	}
+	
+}
 
 
