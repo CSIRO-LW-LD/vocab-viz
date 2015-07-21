@@ -25,7 +25,12 @@ var ereefsSearch = function(q) {
 var renderListGroup = function (arrItems, typeLabel) {
 	$.each(arrItems, function(i, item) {
 		if(i <= 10) {
-			var label = '<span class="search-suggestion-itemLabel">'+ item.prefLabel +'</span>';
+			if(typeof item.prefLabel === 'string'){
+				var label = '<span class="search-suggestion-itemLabel">'+ item.prefLabel +'</span>';	
+			}else{
+				var label = '<span class="search-suggestion-itemLabel">'+ item.prefLabel.join(', ') +'</span>';
+			}
+			
 			var type  = '<span class="search-suggestion-typeLabel">'+ typeLabel +'</span>';
 			var uri = item._about;
 			var itemobj = $('<a href="#" id="'+ uri +'" class="search-suggestion-lg list-group-item">'  +  label +  type + '</a>');
@@ -79,7 +84,7 @@ $(document).bind("click", function (event) {
 	$("div.custom-menu").hide();
 });
 
-var keyUpFn = $("#searchbar").keyup(function (e) {
+var keyUpFn = $("#filter").keyup(function (e) {
 		delay(function () {
 		   doSearch();	
 		}, 500);
@@ -90,7 +95,7 @@ var doSearch = function() {
 	$('#dropdown-suggestions').show();
 	$('#dropdown-suggestions').empty();
 	
-	var q = $('#searchbar').val();
+	var q = $('#filter').val();
 	ereefsSearch(q);
 		
 };
@@ -98,15 +103,22 @@ var doSearch = function() {
 $(document).ready(function(){
 
    $(document).on('click', '.search-suggestion-lg', function(e){
+   	 
      var elem = $(e.currentTarget);
 	 var id = elem.attr('id');
 	 var item = $('body').data(id);
 	 
-	 console.log(item.prefLabel);
+	 if(typeof item.prefLabel === 'string'){
+	 	var prefLabel = item.prefLabel;
+	 }else{
+	 	var prefLabel = item.prefLabel.join(', ');
+	 }
+	 	
 	$('#dropdown-suggestions').hide();
-	$('#maincontent').empty();
-	 $('#searchbar').text(item.prefLabel);
-	 $('#searchbar').val(item.prefLabel);
+	$('#content').empty();
+	 $('#filter').text(prefLabel);
+	 $('#filter').val(prefLabel);
+	 $('#filter_button').click();
 	 var resourceUri = item._about;
 			var promise = $.ajax({
 					url : currentEndpoint + "/resource.json",
@@ -116,7 +128,7 @@ $(document).ready(function(){
 					},
 					type : "GET"
 				}).done(function (itemDetails) {
-					$("#maincontent").append(renderSearchResultItem(resourceUri, processSkosLabel(item.prefLabel), itemDetails));
+					$("#content").append(renderSearchResultItem(resourceUri, processSkosLabel(item.prefLabel), itemDetails));
 				});
 
    });

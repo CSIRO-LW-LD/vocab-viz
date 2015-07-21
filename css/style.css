@@ -40,25 +40,8 @@ body, html{
 	overflow: auto;
 }
 
-#filter{
-	display: block;
-	outline-style: none;
-	height: 45px;
-	width: 100%;
-	font-size: 15px;
-	border-radius: 0px;
-	border: 0;
-	text-align: center;
-	border-bottom: 1px solid #EFEFEF;
-	border-left: 1px solid #efefef;
-	background-color: rgba(247, 247, 247, 0.79);
-	padding: 15px 10px;
-	box-sizing: border-box;
-	transition: all 0.5s;
-}
-
 #details{
-	width: 500px;
+	width: 550px;
 	height: 100%;
 	position: relative;
 	float: right;
@@ -83,6 +66,48 @@ body, html{
 	margin: 65px auto 0px auto;
 	border-bottom: 1px solid #ececec;
 }
+
+#dropdown-suggestions {
+	border-radius: 0px;
+	width: 475px;
+	position: relative;
+	margin-top: 46px;  
+}
+
+#dropdown-suggestions  div div.list-group {
+   width: 100%;
+   border-radius: 0px;      
+}
+
+.search-suggestion-typeLabel {
+    float: right;
+	color: lightgray;
+}
+
+.dd-display {
+   position: absolute;
+   width: 100%;
+   border-radius: 0px;   
+   
+}
+
+#filter{
+	display: block;
+	outline-style: none;
+	height: 45px;
+	width: 100%;
+	font-size: 15px;
+	border-radius: 0px;
+	border: 0;
+	text-align: center;
+	border-bottom: 1px solid #EFEFEF;
+	border-left: 1px solid #efefef;
+	background-color: rgba(247, 247, 247, 0.79);
+	padding: 15px 10px;
+	box-sizing: border-box;
+	transition: all 0.5s;
+}
+
 
 #filter:focus{
 	box-shadow: none;
