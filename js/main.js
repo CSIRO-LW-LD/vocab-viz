@@ -105,7 +105,7 @@ d3.select('#body').on('keydown', filterElementByInput);
 
 d3.select('#filter').on('input', function(){
 	input = String(d3.select(this).property('value'));
-	console.log(input);
+	////console.log(input);
 	if(input == ''){
 		filterElementByInput();
 	}
@@ -123,7 +123,7 @@ $(document).on('click', '.resprop-field', function(){
 function filterElementByInput(exactMatch){
 	input = String(d3.select('#filter').property('value'));
 	if(d3.event != undefined){
-		console.log(d3.event.keyCode);
+		//console.log(d3.event.keyCode);
 	
 		if (input == ''){
 			input = 'eReefs';
@@ -389,7 +389,7 @@ function click(d){
 }
 
 function prepareToShowDetail(resourceUri, itemDetails, node){
-	console.log();
+	//console.log();
 	var prefLabel = node.name;
 		
 	if (prefLabel.indexOf(',') >= 0){
@@ -419,13 +419,13 @@ function prepareData(data){
 		if (child != null){
 			data_processed['children'].push(child);
 		}else{
-			console.log(data['result']['items'][i]);
+			//console.log(data['result']['items'][i]);
 		}
 	}
 
 
 
-	console.dir(data_processed);
+	//console.dir(data_processed);
 	initialise(data_processed, null);
 
 
@@ -438,7 +438,7 @@ function prepareData(data){
  */
 
 function navigate(object){
-	//console.dir(object);
+	////console.dir(object);
 	if (typeof object === 'string' || object instanceof String){
 		return null;
 	}
@@ -481,7 +481,7 @@ function navigate(object){
 		return current_object;
 
 	}else{
-		console.log(object);
+		//console.log(object);
 		return null 
 	}
 }
@@ -521,9 +521,9 @@ function cluster(children){
 					return 1;
 				return 0;
 			});
-			// console.log(children[begin].name);
-			// console.log(children[end].name);
-			// console.log(group);
+			// //console.log(children[begin].name);
+			// //console.log(children[end].name);
+			// //console.log(group);
 			result.push(group);
 		}
 		
