@@ -1,4 +1,4 @@
-var CURRENTENDPOINT = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var CURRENTENDPOINT = 'http://demo.sissvoc.info/sissvoc/uwdc';
 var details_opened = true;
 var input;
 /**
@@ -405,7 +405,7 @@ function prepareToShowDetail(resourceUri, itemDetails, node){
 var data_processed = {};
 
 $.get(
-    "http://sissvoc.ereefs.info/sissvoc/ereefs/collection.json?_page=0&_pageSize=50",
+    CURRENTENDPOINT + "/conceptscheme.json?_page=0&_pageSize=50",
     {},
     prepareData
 );
@@ -442,18 +442,29 @@ function navigate(object){
 	if (typeof object === 'string' || object instanceof String){
 		return null;
 	}
-	if ('prefLabel' in object){
-		
-		/**
-		 * Generate the name correctly depending if it is an array or an single string
-		 */
+	if ('prefLabel' in object || 'label' in object){
 		var name;
-		if (typeof object['prefLabel'] === 'string' || object['prefLabel'] instanceof String){
-			name = object['prefLabel'];
-		}else{
-			name = object['prefLabel'].join(', ');
-		}
 
+		if('prefLabel' in object) {
+			/**
+			 * Generate the name correctly depending if it is an array or an single string
+			 */
+			if (typeof object['prefLabel'] === 'string' || object['prefLabel'] instanceof String){
+				name = object['prefLabel'];
+			}else{
+				name = object['prefLabel'].join(', ');
+			}
+		}
+		else if('label' in object) {
+			/**
+			 * Generate the name correctly depending if it is an array or an single string
+			 */
+			if (typeof object['label'] === 'string' || object['label'] instanceof String){
+				name = object['label'];
+			}else{
+				name = object['label']._value;
+			}
+		}
 		var current_object = {'name': name, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
 
 		/**
@@ -464,6 +475,15 @@ function navigate(object){
 		if('member' in object){
 			for(var j = 0; j < object['member'].length; j++){
 				var child = navigate(object['member'][j]);
+				if (child !== null){
+					current_object['children'].push(child);	
+				}
+				
+			}
+		}
+		if('hasTopConcept' in object){
+			for(var j = 0; j < object['hasTopConcept'].length; j++){
+				var child = navigate(object['hasTopConcept'][j]);
 				if (child !== null){
 					current_object['children'].push(child);	
 				}
