@@ -64,9 +64,11 @@ var processSkosLabel = function (labelObjOrArray) {
 };
 var handleUnmappedResources = function (resource) {
 	if ($.type(resource) === "array") {
-		var str = "<ul class=\"collapse in\" id=\"list\">";
+		var str = "<ul class=\"collapse in\">";
+		console.log(resource);
 		$.each(resource, function (i, item) {
-			str = str + "<li>" + processAboutOrDefault(item) + "</li> ";
+			// these are the members
+			str = str + "<li>" + processAboutOrDefault(item, true) + "</li> ";
 		});
 		str = str + "</ul>";
 		return str;
@@ -79,28 +81,41 @@ var formatResPropList = function (prop, value) {
 	var collapse_attribute = '';
 	var collapse_arrow = '';
 
-	if (prop == 'member'){
+	if (prop == 'member' || prop == 'broader' || prop == 'narrower' || prop == 'related' || prop == 'broadMatch'){
 		collapse_attribute = 'data-toggle="collapse" data-target="#list" style="cursor: pointer"';
 		collapse_arrow = '<b class="caret rotate180"></b>';
 	}
+
+	if(value !== undefined){
+		if (String(value).indexOf('<ul') < 0){
+			collapse_attribute = '';
+			collapse_arrow = '';
+		}
+			
+	}else{
+		return '';
+	}
+
 	if(value._value !== undefined) {
 		return "<li class='resProp'><span class='resprop-field'" + collapse_attribute + ">" + prop + collapse_arrow + "</span> <span class='resprop-value'>" + value._value + "</span></li>";
 	}
+	
 
 	return "<li class='resProp'><span class='resprop-field'" + collapse_attribute + ">" + prop + collapse_arrow + "</span><span class='resprop-value'> " + value + "</span></li>";
 };
 
-var processAboutOrDefault = function (currResource) {
+var processAboutOrDefault = function (currResource, isMember) {
 	var str;
+	console.log('process '+isMember);
 	if (currResource === undefined) {
 		return;
 	}
 	if (currResource._about !== undefined) {
-		str = getLinkOrText(currResource._about)
+		str = getLinkOrText(currResource._about, undefined, isMember)
 	}
 	//try currResource
 	else {
-		str = getLinkOrText(currResource)
+		str = getLinkOrText(currResource, undefined, isMember)
 	}
 	return str;
 }
@@ -154,15 +169,27 @@ var formatResourceLinks = function (elemId, elemLabel, arrResources, menuElem) {
 		
 	});
 };
-var getLinkOrText = function (str, label) {
+var getLinkOrText = function (str, label, isMember) {
 	if (str === undefined)
 		return str
 		
-		var regex = /^http:\/\/*/;
+	var regex = /^http:\/\/*/;
+	
 	if (regex.test(str)) {
+		if (isMember){
+			var separator = str.lastIndexOf('/');
+			label = str.substring(separator + 1);
+
+			if (label.indexOf('#') >= 0){
+				separator = str.lastIndexOf('#');
+				label = str.substring(separator + 1);
+			}
+		}
+		
+
 		if (label === undefined) {
 			return "<a href=\"" + currentEndpoint + "/resource?uri=" + String(str).replace('#', '%23') + "\">" + str + "</a>";
-                }
+        }
 		else {
 			return "<a href=\"" + currentEndpoint + "/resource?uri=" + String(str).replace("#", '%23') + "\">" + label + "</a>";
 		}

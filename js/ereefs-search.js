@@ -85,9 +85,13 @@ $(document).bind("click", function (event) {
 });
 
 var keyUpFn = $("#filter").keyup(function (e) {
-		delay(function () {
-		   doSearch();	
-		}, 500);
+		if( e.keyCode == 13){
+			filterElementByInput();
+		}else{
+			delay(function () {
+			   doSearch();	
+			}, 500);
+		}
 	});
 	
 	
@@ -96,7 +100,10 @@ var doSearch = function() {
 	$('#dropdown-suggestions').empty();
 	
 	var q = $('#filter').val();
-	ereefsSearch(q);
+	if (q != ''){
+		ereefsSearch(q);	
+	}
+	
 		
 };
 	
@@ -118,7 +125,7 @@ $(document).ready(function(){
 	$('#content').empty();
 	 $('#filter').text(prefLabel);
 	 $('#filter').val(prefLabel);
-	 $('#filter_button').click();
+	 filterElementByInput('exactMatch');
 	 var resourceUri = item._about;
 			var promise = $.ajax({
 					url : currentEndpoint + "/resource.json",

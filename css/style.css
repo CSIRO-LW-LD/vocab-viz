@@ -71,7 +71,8 @@ body, html{
 	border-radius: 0px;
 	width: 475px;
 	position: relative;
-	margin-top: 46px;  
+	margin-top: 46px; 
+	z-index: 10; 
 }
 
 #dropdown-suggestions  div div.list-group {

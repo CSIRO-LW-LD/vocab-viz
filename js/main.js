@@ -18,7 +18,7 @@ function toggleDetails(){
 	details_opened = !details_opened;
 }
 
-function findNodeAndParents(node){
+function findNodeAndParents(node, exactMatch){
 	var children_found = false;
 
 	// Iterate the children and _children (hidden ones)
@@ -26,7 +26,7 @@ function findNodeAndParents(node){
 		var children = node.children ? node.children : node._children; 
 		
 		for (var i = 0; i < children.length; i++){
-			if (findNodeAndParents(children[i])){
+			if (findNodeAndParents(children[i], exactMatch)){
 				children_found = true;
 			}
 		}
@@ -46,7 +46,7 @@ function findNodeAndParents(node){
 	 * to open push the parents to the stack as well.
 	 */
 	
-	if (doesNodeNameContainInput(node)){
+	if (doesNodeNameContainInput(node, exactMatch)){
 		
 		openNode(node);
 		
@@ -79,11 +79,19 @@ function collapseNode(node){
 	}
 }
 
-function doesNodeNameContainInput(node){
-	if (node.name.toLowerCase().indexOf(input.toLowerCase()) >= 0)
-		return true;
-	else
-		return false;
+function doesNodeNameContainInput(node, exactMatch){
+	if (exactMatch !== undefined){
+		if (node.name.toLowerCase() == input.toLowerCase())
+			return true;
+		else
+			return false;
+	}else{
+		if (node.name.toLowerCase().indexOf(input.toLowerCase()) >= 0)
+			return true;
+		else
+			return false;
+	}
+	
 }
 
 /**
@@ -93,7 +101,7 @@ function doesNodeNameContainInput(node){
  */
 // d3.select('#filter').on('input', function(){
 d3.select('#filter_button').on('click', filterElementByInput)
-d3.select('body').on('keydown', filterElementByInput);
+d3.select('#body').on('keydown', filterElementByInput);
 
 d3.select('#filter').on('input', function(){
 	input = String(d3.select(this).property('value'));
@@ -107,26 +115,30 @@ $(document).on('click', '.resprop-field', function(){
 	
 	if($(this).data('toggle') == 'collapse'){
 		$(this).children().toggleClass('rotate180');
+		$(this).siblings().children().collapse('toggle');
 	}
 });
 
 
-function filterElementByInput(){
+function filterElementByInput(exactMatch){
 	input = String(d3.select('#filter').property('value'));
-	console.log(d3.event.keyCode);
+	if(d3.event != undefined){
+		console.log(d3.event.keyCode);
 	
-	if (input == ''){
-		input = 'eReefs';
-	}else{
-		if(d3.event.keyCode != 13 && d3.event.keyCode != 0){
-			return false;
-		}	
+		if (input == ''){
+			input = 'eReefs';
+		}else{
+			if(d3.event.keyCode != 13 && d3.event.keyCode != 0){
+				return false;
+			}	
+		}
 	}
+	
 
 	var parents = []
 	var broader_matches = 0;
 
-	findNodeAndParents(root);
+	findNodeAndParents(root, exactMatch);
 	update(root);
 	//call update on the stack
 
@@ -136,7 +148,8 @@ function filterElementByInput(){
 		if (input == '' || input == 'eReefs')
 			return false;
 
-		if(d.name.toLowerCase().indexOf(input.toLowerCase()) >= 0){
+		
+		if(doesNodeNameContainInput(d, exactMatch)){
 			if(parents.indexOf(d.name.toLowerCase) < 0){
 				parents.push(d.name.toLowerCase());
 				broader_matches++;
@@ -144,6 +157,8 @@ function filterElementByInput(){
 			
 			return true;
 		}
+		
+		
 		if (d.parent !== undefined){
 			if (parents.indexOf(d.parent.name) >= 0){ 
 				parents.push(d.name);
@@ -159,14 +174,18 @@ function filterElementByInput(){
 	text.style('opacity', '0.6');
 	text.filter(function(d){
 		
-		if(d.name.toLowerCase().indexOf(input.toLowerCase()) >= 0){			
+		if(doesNodeNameContainInput(d, exactMatch)){			
 			return true;
-		}
+		}	
+		
 		if (d.parent !== undefined){
 			if (parents.indexOf(d.parent.name) >= 0){ 
 				return true;
 			}	
 		}
+		
+
+		
 		
 		return false;
 	}).style('opacity', '1');
