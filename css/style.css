@@ -205,3 +205,14 @@ li{
 	left: 5px;
 }
 
+.caret{
+	transition: all 0.3s;
+	transform: rotate(0deg);
+	-webkit-transform: rotate(0deg);
+}
+
+.rotate180{
+	transform: rotate(180deg);
+	-webkit-transform: rotate(180deg);
+}
+

@@ -64,7 +64,7 @@ var processSkosLabel = function (labelObjOrArray) {
 };
 var handleUnmappedResources = function (resource) {
 	if ($.type(resource) === "array") {
-		var str = "<ul>";
+		var str = "<ul class=\"collapse in\" id=\"list\">";
 		$.each(resource, function (i, item) {
 			str = str + "<li>" + processAboutOrDefault(item) + "</li> ";
 		});
@@ -76,12 +76,18 @@ var handleUnmappedResources = function (resource) {
 	}
 };
 var formatResPropList = function (prop, value) {
+	var collapse_attribute = '';
+	var collapse_arrow = '';
 
+	if (prop == 'member'){
+		collapse_attribute = 'data-toggle="collapse" data-target="#list" style="cursor: pointer"';
+		collapse_arrow = '<b class="caret rotate180"></b>';
+	}
 	if(value._value !== undefined) {
-		return "<li class='resProp'><span class='resprop-field'>" + prop + "</span> <span class='resprop-value'>" + value._value + "</span></li>";
+		return "<li class='resProp'><span class='resprop-field'" + collapse_attribute + ">" + prop + collapse_arrow + "</span> <span class='resprop-value'>" + value._value + "</span></li>";
 	}
 
-	return "<li class='resProp'><span class='resprop-field'>" + prop + "</span><span class='resprop-value'> " + value + "</span></li>";
+	return "<li class='resProp'><span class='resprop-field'" + collapse_attribute + ">" + prop + collapse_arrow + "</span><span class='resprop-value'> " + value + "</span></li>";
 };
 
 var processAboutOrDefault = function (currResource) {
