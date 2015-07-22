@@ -188,10 +188,10 @@ var getLinkOrText = function (str, label, isMember) {
 		
 
 		if (label === undefined) {
-			return "<a href=\"" + currentEndpoint + "/resource?uri=" + String(str).replace('#', '%23') + "\">" + str + "</a>";
+			return "<a href=\"" + String(str).replace('#', '%23') + "\">" + str + "</a>";
         }
 		else {
-			return "<a href=\"" + currentEndpoint + "/resource?uri=" + String(str).replace("#", '%23') + "\">" + label + "</a>";
+			return "<a href=\"" + String(str).replace("#", '%23') + "\">" + label + "</a>";
 		}
 	} else {
 		if (label === undefined)
@@ -207,7 +207,7 @@ var renderSearchResultItem = function (uri, label, data) {
 	//var newdiv = document.createElement( "div" ).addClass("res");
 	var newdiv = $('<div/>')
 		.addClass("res");
-	newdiv.append("<h3 class='title'><a href=\""+ currentEndpoint +"/resource?uri=" + uri.replace('#', '%23') + "\" target='out'>" + label + "</a></h3>");
+	newdiv.append("<h3 class='title'><a href=\"" + uri.replace('#', '%23') + "\" target='out'>" + label + "</a></h3>");
 	
 	newdiv.append("<div class='dispUri'>" + getLinkOrText(uri) + "</div>");
 	
