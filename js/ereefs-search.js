@@ -74,14 +74,9 @@ var delay = (function () {
 	};
 })();
 
-$('#searchform').submit(function( event ) {
-    
-   event.preventDefault();
-	doSearch();
-});
 
 $(document).bind("click", function (event) {
-	$("div.custom-menu").hide();
+	$("div#dropdown-suggestions").hide();
 });
 
 var keyUpFn = $("#filter").keyup(function (e) {
