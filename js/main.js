@@ -1,4 +1,6 @@
 var CURRENTENDPOINT = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var default_url = 'http://sissvoc.ereefs.info/sissvoc/ereefs/collection.json?_page=0&_pageSize=50';
+var needsToPrepareData = true;
 var details_opened = true;
 var input;
 /**
@@ -126,7 +128,7 @@ function filterElementByInput(exactMatch){
 		//console.log(d3.event.keyCode);
 	
 		if (input == ''){
-			input = 'eReefs';
+			input = root.name;
 		}else{
 			if(d3.event.keyCode != 13 && d3.event.keyCode != 0){
 				return false;
@@ -359,7 +361,7 @@ function click(d){
 	if (d.about !== undefined){
 		$('#content').empty();
 		
-		
+		// change below to gather the data and append information to the details panel (#content)
 		var resourceUri = d.about;
 		
 		var promise = $.ajax({
@@ -372,9 +374,6 @@ function click(d){
 				}).done(function(itemDetails){
 					prepareToShowDetail(resourceUri, itemDetails, d);
 				});
-
-		
-		//call sissvoc
 	}
 	
 
@@ -405,24 +404,28 @@ function prepareToShowDetail(resourceUri, itemDetails, node){
 var data_processed = {};
 
 $.get(
-    "http://sissvoc.ereefs.info/sissvoc/ereefs/collection.json?_page=0&_pageSize=50",
+    default_url,
     {},
     prepareData
 );
 
 function prepareData(data){
 
-	var data_processed = {'name': 'eReefs', 'children': []};
+	if (needsToPrepareData){
 
-	for(var i = 0; i < data['result']['items'].length; i++){
-		var child = navigate(data['result']['items'][i]);
-		if (child != null){
-			data_processed['children'].push(child);
-		}else{
-			//console.log(data['result']['items'][i]);
+		var data_processed = {'name': 'eReefs', 'children': []};
+
+		for(var i = 0; i < data['result']['items'].length; i++){
+			var child = navigate(data['result']['items'][i]);
+			if (child != null){
+				data_processed['children'].push(child);
+			}else{
+				//console.log(data['result']['items'][i]);
+			}
 		}
-	}
 
+	}
+	
 
 
 	//console.dir(data_processed);
