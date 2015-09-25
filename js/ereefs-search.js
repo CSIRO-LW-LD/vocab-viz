@@ -1,4 +1,5 @@
 var currentEndpoint = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var dblEndpoint = 'http://databroker-vc.nexus.csiro.au:8084';
 
 var ereefsSearch = function(q) {
     $('#dropdown-suggestions').append('<div class="dd-display"><div class="list-group"></div></div>');
@@ -106,6 +107,57 @@ var doSearch = function() {
 	
 		
 };
+
+var getVocabResourceType = function(data) {
+    var arrType = [];
+   	$.each(data.result.primaryTopic, function (k, v) {
+		if (k == "type") {
+			if ($.type(v) === "array") {
+				$.each(v, function (i, typeItem) {
+					arrType.push(typeItem._about);
+				});
+			} 
+			else {
+				arrType.push(v._about);
+			}
+		}
+    });
+	return arrType;
+};
+
+var renderRelatedDataset = function(resourceUri, itemDetails) {
+	var newdiv = $('<div/>')
+		.addClass("relatedDatasets");
+	newdiv.append("<h3 class='title'>Related Datasets</h3>");
+
+	//work out if the resource is a qk or substanceOrTaxon
+	var arrType = getVocabResourceType(itemDetails);
+	var dbl_params = {};
+	$.each(arrType, function(i, item) {
+	   if(item == "http://environment.data.gov.au/def/op#SubstanceOrTaxon") {
+	      dbl_params['substanceOrTaxon_uri'] = resourceUri;
+	   }
+	   else if(item == "http://environment.data.gov.au/def/op#ScaledQuantityKind") {
+	      dbl_params['qk_uri'] = resourceUri;
+	   }
+	});
+	
+	var promise = $.ajax({
+		url : dblEndpoint + "/dataset/item/count",
+		data : dbl_params,
+		type : "GET"
+	}).done(function (dbl_res) {
+	    
+		var list = newdiv.append('<ul></ul>').find('ul');
+
+		$.each(dbl_res, function(i, dataset) {
+		   list.append("<li'><a href='http://databroker-vc.nexus.csiro.au/elda/dpn/resource?uri=" 
+		            + dataset._id + "'>" + dataset._id +"</a> (" + dataset.count +" datasets)</li>");
+		});
+	});
+	
+	return newdiv;
+};
 	
 $(document).ready(function(){
 
@@ -127,16 +179,17 @@ $(document).ready(function(){
 	 $('#filter').val(prefLabel);
 	 filterElementByInput('exactMatch');
 	 var resourceUri = item._about;
-			var promise = $.ajax({
-					url : currentEndpoint + "/resource.json",
-					data : {
-						uri : resourceUri,
-						_view : "all"
-					},
-					type : "GET"
-				}).done(function (itemDetails) {
-					$("#content").append(renderSearchResultItem(resourceUri, processSkosLabel(item.prefLabel), itemDetails));
-				});
+	var promise = $.ajax({
+		url : currentEndpoint + "/resource.json",
+		data : {
+			uri : resourceUri,
+			_view : "all"
+		},
+		type : "GET"
+	}).done(function (itemDetails) {
+		$("#content").append(renderSearchResultItem(resourceUri, processSkosLabel(item.prefLabel), itemDetails));
+		$("#content").append(renderRelatedDataset(resourceUri, itemDetails));
+	});
 
    });
 });
