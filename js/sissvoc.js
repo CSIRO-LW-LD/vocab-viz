@@ -30,6 +30,15 @@ var getCollections = function(pageSize, currPage) {
 	);
 };
 
+//this gets all the collections defined in a sissvoc endpoint by 'q' string 
+// fnProcessCollections is a function that does something with the returned json
+var getResource = function(uri) {
+    var url = currentEndpoint + '/resource.json?uri=' + uri;
+    $.get( url, function(data) {
+	   return data;
+	}
+	);
+};
 
 
 var processMultilingualLabel = function (labelObj) {

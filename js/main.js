@@ -259,7 +259,7 @@ function update(source) {
       .attr("r", 1e-6)
       .style("fill", function(d) {
 
-      	if(d.name.indexOf(' Group') >= 0){
+      	if(d.name && d.name.indexOf(' Group') >= 0){
   			return "rgb(85, 165, 255);";
   		}
       	if (d._children){
@@ -412,7 +412,7 @@ $.get(
 
 function prepareData(data){
 
-	var data_processed = {'name': 'eReefs', 'children': []};
+	var data_processed = {'name': 'UWDC', 'children': []};
 
 	for(var i = 0; i < data['result']['items'].length; i++){
 		var child = navigate(data['result']['items'][i]);
@@ -440,32 +440,42 @@ function prepareData(data){
 function navigate(object){
 	////console.dir(object);
 	if (typeof object === 'string' || object instanceof String){
-		return null;
+		var current_object = {'_about': object, 'children':[]};
+		//go off and fill in the details for current_object
+		var url = CURRENTENDPOINT + '/resource.json?uri=' + object;
+		$.get( url, function(data) {
+		    addDetailsToNode(data.result.primaryTopic, current_object);
+		});
+		return current_object;
 	}
+	
+	var current_object = {'name': name, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
+	addDetailsToNode(object, current_object);
+	
+	return current_object;
+}
+
+function addDetailsToNode(object, current_object) {
 	if ('prefLabel' in object || 'label' in object){
-		var name;
+		var name = null;
 
 		if('prefLabel' in object) {
 			/**
 			 * Generate the name correctly depending if it is an array or an single string
 			 */
-			if (typeof object['prefLabel'] === 'string' || object['prefLabel'] instanceof String){
-				name = object['prefLabel'];
-			}else{
-				name = object['prefLabel'].join(', ');
-			}
+			name = processSkosLabel(object['prefLabel'])
 		}
 		else if('label' in object) {
 			/**
 			 * Generate the name correctly depending if it is an array or an single string
 			 */
-			if (typeof object['label'] === 'string' || object['label'] instanceof String){
-				name = object['label'];
-			}else{
-				name = object['label']._value;
-			}
+			name = processSkosLabel(object['label'])
 		}
-		var current_object = {'name': name, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
+		
+		if(name != null) {
+			current_object['name'] = name;
+		}
+		
 
 		/**
 		 * if the element has member (children), then it will call the method recursively
@@ -487,23 +497,24 @@ function navigate(object){
 				if (child !== null){
 					current_object['children'].push(child);	
 				}
-				
+			}
+		}
+		if('narrower' in object){
+			for(var j = 0; j < object['narrower'].length; j++){
+				var child = navigate(object['narrower'][j]);
+				if (child !== null){
+					current_object['children'].push(child);	
+				}
 			}
 		}
 		if (current_object['children'].length == 0){
 			delete current_object['children'];
 		}else{
-			
-
 			current_object['children'] = cluster(current_object['children']);
 		}
-
 		return current_object;
-
-	}else{
-		//console.log(object);
-		return null 
 	}
+	return null;
 }
 
 /**
