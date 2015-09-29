@@ -482,11 +482,14 @@ function addDetailsToNode(object, current_object) {
 		 * and then with the children done it will push the children and its children to
 		 * the array.
 		 */
+		 
+ 		var children = current_object.children ? current_object.children : current_object._children; 
+
 		if('member' in object){
 			for(var j = 0; j < object['member'].length; j++){
 				var child = navigate(object['member'][j]);
 				if (child !== null){
-					current_object['children'].push(child);	
+					children.push(child);	
 				}
 				
 			}
@@ -495,7 +498,7 @@ function addDetailsToNode(object, current_object) {
 			for(var j = 0; j < object['hasTopConcept'].length; j++){
 				var child = navigate(object['hasTopConcept'][j]);
 				if (child !== null){
-					current_object['children'].push(child);	
+					children.push(child);	
 				}
 			}
 		}
@@ -503,7 +506,7 @@ function addDetailsToNode(object, current_object) {
 			for(var j = 0; j < object['narrower'].length; j++){
 				var child = navigate(object['narrower'][j]);
 				if (child !== null){
-					current_object['children'].push(child);	
+					children.push(child);	
 				}
 			}
 		}
@@ -514,7 +517,7 @@ function addDetailsToNode(object, current_object) {
 		}
 		return current_object;
 	}
-	return null;
+	return current_object;
 }
 
 /**
