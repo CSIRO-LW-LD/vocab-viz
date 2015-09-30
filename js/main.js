@@ -3,6 +3,12 @@ var currentEndpoint = 'http://demo.sissvoc.info/sissvoc/uwdc';
 var details_opened = true;
 var MAX_LABEL_LENGTH = 50;
 var input;
+
+var margin = {top: 20, right: 30, bottom: 20, left: 100},
+    width = 1350 - margin.right - margin.left,
+    height = 900 - margin.top - margin.bottom;
+
+
 /**
  * Function to hide or show the details tab on the right
  * depending on the actual state
@@ -197,9 +203,6 @@ function filterElementByInput(exactMatch){
  * Prepare the tree to be built
  */
 
-var margin = {top: 20, right: 30, bottom: 20, left: 200},
-    width = 1350 - margin.right - margin.left,
-    height = 900 - margin.top - margin.bottom;
 
 var i = 0,
     duration = 750,
