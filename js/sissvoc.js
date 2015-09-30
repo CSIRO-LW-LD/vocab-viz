@@ -1,5 +1,6 @@
 //If not already defined, need to define a current sissvoc endpoint e.g. below:
 //var currentEndpoint = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var sissvocRenderResourceLinks = true;
 
 //this searches Concepts defined in a sissvoc endpoint by 'q' string 
 // fnProcessConcepts is a function that does something with the returned json
@@ -197,9 +198,15 @@ var getLinkOrText = function (str, label, isMember) {
 		
 
 		if (label === undefined) {
+			if(sissvocRenderResourceLinks) {
+				return "<a href=\"" +currentEndpoint + "/resource?uri=" + String(str).replace('#', '%23') + "\">" + str + "</a>";
+			}
 			return "<a href=\"" + String(str).replace('#', '%23') + "\">" + str + "</a>";
         }
 		else {
+			if(sissvocRenderResourceLinks) {
+				return "<a href=\"" +currentEndpoint + "/resource?uri=" + String(str).replace("#", '%23') + "\">" + label + "</a>";
+			}
 			return "<a href=\"" + String(str).replace("#", '%23') + "\">" + label + "</a>";
 		}
 	} else {
