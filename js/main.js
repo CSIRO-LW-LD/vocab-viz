@@ -1,4 +1,5 @@
 var CURRENTENDPOINT = 'http://demo.sissvoc.info/sissvoc/uwdc';
+var currentEndpoint = 'http://demo.sissvoc.info/sissvoc/uwdc';
 var details_opened = true;
 var input;
 /**
