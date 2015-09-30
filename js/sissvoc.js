@@ -216,7 +216,9 @@ var renderSearchResultItem = function (uri, label, data) {
 	//var newdiv = document.createElement( "div" ).addClass("res");
 	var newdiv = $('<div/>')
 		.addClass("res");
-	newdiv.append("<h3 class='title'><a href=\"" + uri.replace('#', '%23') + "\" target='out'>" + label + "</a></h3>");
+	var resourceEndpoint = currentEndpoint + "/resource?uri=" + uri.replace('#', '%23');
+	
+	newdiv.append("<h3 class='title'><a href=\"" + resourceEndpoint + "\" target='out'>" + label + "</a></h3>");
 	
 	newdiv.append("<div class='dispUri'>" + getLinkOrText(uri) + "</div>");
 	

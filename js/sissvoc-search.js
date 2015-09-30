@@ -15,7 +15,7 @@ var sissvocSearch = function(q) {
 
 var renderListGroup = function (arrItems, typeLabel) {
 	$.each(arrItems, function(i, item) {
-		if(i <= 10) {
+		if(i <= 20) {
 		
 			//process label
 			

@@ -1,6 +1,7 @@
 var CURRENTENDPOINT = 'http://demo.sissvoc.info/sissvoc/uwdc';
 var currentEndpoint = 'http://demo.sissvoc.info/sissvoc/uwdc';
 var details_opened = true;
+var MAX_LABEL_LENGTH = 50;
 var input;
 /**
  * Function to hide or show the details tab on the right
@@ -196,8 +197,8 @@ function filterElementByInput(exactMatch){
  * Prepare the tree to be built
  */
 
-var margin = {top: 20, right: 30, bottom: 20, left: 100},
-    width = 1050 - margin.right - margin.left,
+var margin = {top: 20, right: 30, bottom: 20, left: 200},
+    width = 1350 - margin.right - margin.left,
     height = 900 - margin.top - margin.bottom;
 
 var i = 0,
@@ -391,10 +392,10 @@ function click(d){
 
 function prepareToShowDetail(resourceUri, itemDetails, node){
 	//console.log();
-	var prefLabel = node.name;
+	var prefLabel = node.longname;
 		
 	if (prefLabel.indexOf(',') >= 0){
-		var prefLabel = node.name.split(", ");	
+		var prefLabel = node.longname.split(", ");	
 	}
 	var details = renderSearchResultItem(resourceUri, processSkosLabel(prefLabel), itemDetails);
 	$('#content').append(details);
@@ -445,13 +446,26 @@ function navigate(object){
 		//go off and fill in the details for current_object
 		var url = CURRENTENDPOINT + '/resource.json?uri=' + object;
 		$.get( url, function(data) {
-		    addDetailsToNode(data.result.primaryTopic, current_object);
+		   current_object =  addDetailsToNode(data.result.primaryTopic, current_object);
+		   collapseNode(current_object);
 		});
 		return current_object;
 	}
+	var labelOrPreflabel = object.prefLabel ? object.prefLabel : object.label;
 	
-	var current_object = {'name': name, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
-	addDetailsToNode(object, current_object);
+	var name = processMultilingualLabel(labelOrPreflabel);
+	var longname = name;
+	if(name.length > MAX_LABEL_LENGTH ) {
+	   name = name.substring(0,MAX_LABEL_LENGTH ) + "..."
+	}
+	var current_object = {'name': name, 'longname': longname, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
+	var url = CURRENTENDPOINT + '/resource.json?uri=' + object._about;
+	$.get( url, function(data) {
+	   current_object =  addDetailsToNode(data.result.primaryTopic, current_object);
+	   collapseNode(current_object);
+	});
+	
+	//current_object = addDetailsToNode(object, current_object);
 	
 	return current_object;
 }
@@ -474,7 +488,12 @@ function addDetailsToNode(object, current_object) {
 		}
 		
 		if(name != null) {
-			current_object['name'] = name;
+		    var shortname = name;
+			if(name.length > MAX_LABEL_LENGTH ) {
+	           shortname = name.substring(0,MAX_LABEL_LENGTH ) + "..."
+	        }
+			current_object['name'] = shortname;
+			current_object['longname'] = name;
 		}
 		
 
@@ -483,7 +502,9 @@ function addDetailsToNode(object, current_object) {
 		 * and then with the children done it will push the children and its children to
 		 * the array.
 		 */
-		 
+		if(current_object.children === 'undefined'  &&  current_object._children === 'undefined'){
+		   current_object.children = [];
+		}
  		var children = current_object.children ? current_object.children : current_object._children; 
 
 		if('member' in object){
@@ -511,12 +532,13 @@ function addDetailsToNode(object, current_object) {
 				}
 			}
 		}
+		
 		if (current_object['children'].length == 0){
 			delete current_object['children'];
 		}else{
 			current_object['children'] = cluster(current_object['children']);
 		}
-		return current_object;
+		//return current_object;
 	}
 	return current_object;
 }
