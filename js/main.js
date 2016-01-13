@@ -1,5 +1,6 @@
 var CURRENTENDPOINT = 'http://demo.sissvoc.info/sissvoc/uwdc';
-var currentEndpoint = 'http://demo.sissvoc.info/sissvoc/uwdc';
+var currentEndpoint = CURRENTENDPOINT;
+var conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or collection
 var details_opened = true;
 var MAX_LABEL_LENGTH = 50;
 var input;
@@ -410,7 +411,7 @@ function prepareToShowDetail(resourceUri, itemDetails, node){
 var data_processed = {};
 
 $.get(
-    CURRENTENDPOINT + "/conceptscheme.json?_page=0&_pageSize=50",
+    CURRENTENDPOINT + "/" + conceptschemeOrCollection + ".json?_page=0&_pageSize=50",
     {},
     prepareData
 );
