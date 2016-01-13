@@ -1,6 +1,7 @@
-var CURRENTENDPOINT = 'http://demo.sissvoc.info/sissvoc/uwdc';
+var CURRENTENDPOINT = 'http://demo.sissvoc.info/sissvoc/pizza';
 var currentEndpoint = CURRENTENDPOINT;
 var conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or collection
+//var conceptschemeOrCollection = "collection"; //choose conceptscheme or collection
 var details_opened = true;
 var MAX_LABEL_LENGTH = 50;
 var input;
@@ -418,7 +419,7 @@ $.get(
 
 function prepareData(data){
 
-	var data_processed = {'name': 'UWDC', 'children': []};
+	var data_processed = {'name': 'pizza', 'children': []};
 
 	for(var i = 0; i < data['result']['items'].length; i++){
 		var child = navigate(data['result']['items'][i]);
@@ -458,10 +459,15 @@ function navigate(object){
 	var labelOrPreflabel = object.prefLabel ? object.prefLabel : object.label;
 	
 	var name = processMultilingualLabel(labelOrPreflabel);
-	var longname = name;
-	if(name.length > MAX_LABEL_LENGTH ) {
-	   name = name.substring(0,MAX_LABEL_LENGTH ) + "..."
-	}
+        if(name) {
+	   var longname = name;
+   	   if(name.length > MAX_LABEL_LENGTH ) {
+	      name = name.substring(0,MAX_LABEL_LENGTH ) + "..."
+	   }  
+        }
+        else {
+           name = "";
+        }
 	var current_object = {'name': name, 'longname': longname, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
 	var url = CURRENTENDPOINT + '/resource.json?uri=' + object._about;
 	$.get( url, function(data) {
