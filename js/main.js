@@ -4,6 +4,7 @@ var conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or colle
 var details_opened = true;
 var MAX_LABEL_LENGTH = 50;
 var input;
+var data_processed = {};
 
 var margin = {top: 20, right: 30, bottom: 20, left: 100},
     width = 1350 - margin.right - margin.left,
@@ -425,9 +426,6 @@ function navigate(object){
 		return current_object;
 	}
 	var labelOrPreflabel = object.prefLabel ? object.prefLabel : object.label;
-	if(!labelOrPreflabel) {
-		labelOrPreflabel = baseName(object._about);		
-	}
 	var name = processMultilingualLabel(labelOrPreflabel);
         if(name) {
 	   var longname = name;
@@ -468,13 +466,6 @@ function addDetailsToNode(object, current_object) {
 		}
 		
 		
-	}
-    else {
-		//if no pref label, use the baseName
-        name = baseName(current_object.about);
-	}	
-
-	if(name != null) {
 		if(name != null) {
 		    var shortname = name;
 			if(name.length > MAX_LABEL_LENGTH ) {
@@ -520,10 +511,12 @@ function addDetailsToNode(object, current_object) {
 			}
 		}
 		
-		if (current_object['children'].length == 0){
-			delete current_object['children'];
-		}else{
-			current_object['children'] = cluster(current_object['children']);
+		if(current_object['children']) {
+			if (current_object['children'].length == 0){
+				delete current_object['children'];
+			}else{
+				current_object['children'] = cluster(current_object['children']);
+			}
 		}
 		//return current_object;
 	}
@@ -556,7 +549,9 @@ function cluster(children){
 			var end = begin+MAX_CHILDREN-1;
 			
 			end = end < children.length ? end : children.length-1; // check to avoid inexistent position
-			group['name'] = children[begin].name.charAt(0).toUpperCase()+'-'+children[end].name.charAt(0).toUpperCase() + ' Group'; // creates the name for the cluster
+			var beginName = String(children[begin].name);
+			var endName = String(children[end].name);
+			group['name'] = beginName.charAt(0).toUpperCase()+'-'+endName.charAt(0).toUpperCase() + ' Group'; // creates the name for the cluster
 			group['children'] = children.slice(begin, end+1); //make a copy of the array
 			group['children'].sort(function(a, b){
 				if (a.name < b.name)
@@ -625,7 +620,7 @@ function reloadSissvoc() {
 function prepareData(data){
     var vocab_name = baseName(currentEndpoint);
 
-	var data_processed = {'name': vocab_name, 'children': []};
+	data_processed = {'name': vocab_name, 'children': []};
 
 	for(var i = 0; i < data['result']['items'].length; i++){
 		var child = navigate(data['result']['items'][i]);
@@ -707,7 +702,6 @@ $( document ).ready(function() {
     *  Prepare data to be inserted in array. This is just a workaround
     */
 
-    var data_processed = {};
 
     $.get(
         currentEndpoint + "/" + conceptschemeOrCollection + ".json?_page=0&_pageSize=50",
