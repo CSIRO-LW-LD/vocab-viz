@@ -399,7 +399,7 @@ function prepareToShowDetail(resourceUri, itemDetails, node){
 	//console.log();
 	var prefLabel = node.longname;
 		
-	if (prefLabel.indexOf(',') >= 0){
+	if (prefLabel && prefLabel.indexOf(',') >= 0){
 		var prefLabel = node.longname.split(", ");	
 	}
 	var details = renderSearchResultItem(resourceUri, processSkosLabel(prefLabel), itemDetails);
@@ -425,7 +425,9 @@ function navigate(object){
 		return current_object;
 	}
 	var labelOrPreflabel = object.prefLabel ? object.prefLabel : object.label;
-	
+	if(!labelOrPreflabel) {
+		labelOrPreflabel = baseName(object._about);		
+	}
 	var name = processMultilingualLabel(labelOrPreflabel);
         if(name) {
 	   var longname = name;
@@ -449,8 +451,8 @@ function navigate(object){
 }
 
 function addDetailsToNode(object, current_object) {
-	if ('prefLabel' in object || 'label' in object){
-		var name = null;
+	var name = null;
+	if ('prefLabel' in object || 'label' in object){	
 
 		if('prefLabel' in object) {
 			/**
@@ -465,6 +467,14 @@ function addDetailsToNode(object, current_object) {
 			name = processSkosLabel(object['label'])
 		}
 		
+		
+	}
+    else {
+		//if no pref label, use the baseName
+        name = baseName(current_object.about);
+	}	
+
+	if(name != null) {
 		if(name != null) {
 		    var shortname = name;
 			if(name.length > MAX_LABEL_LENGTH ) {
@@ -474,7 +484,6 @@ function addDetailsToNode(object, current_object) {
 			current_object['longname'] = name;
 		}
 		
-
 		/**
 		 * if the element has member (children), then it will call the method recursively
 		 * and then with the children done it will push the children and its children to
