@@ -648,7 +648,30 @@ $( document ).ready(function() {
 		   currentEndpoint = endpoint;
 		}
 	}	
-   	
+
+	var skosview = getUrlParameter('view');
+   	if(skosview) {
+		console.log("skosview found: " + skosview);
+		conceptschemeOrCollection = skosview;
+		//reset buttons
+		if ($('#skosview_conceptscheme').hasClass('active')) {
+            $('#skosview_conceptscheme').remove('active');
+        }
+		else if($('#skosview_collection').hasClass('active')) {
+		   $('#skosview_collection').remove('active');
+	    }
+		
+		if(skosview == "collection") {
+			$('#skosview_collection').addClass('active');
+		}
+		else {
+			$('#skosview_conceptscheme').addClass('active');
+		}
+	}	else {
+       conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or collection
+	   $('#skosview_conceptscheme').addClass('active');
+	}
+
 	
 	$('#sissvoc-endpoint-update-btn').on('click', function(e){
         e.preventDefault(); // prevent the default click action
