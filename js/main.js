@@ -655,6 +655,7 @@ $( document ).ready(function() {
 		console.log("endpoint found: " + endpoint);
 		if(isUrlValid(endpoint)) {
 		   $("#sissvoc-endpoint-input").val(endpoint);				
+		   currentEndpoint = endpoint;
 		}
 	}	
    	
