@@ -1,5 +1,6 @@
 //If not already defined, need to define a current sissvoc endpoint e.g. below:
 //var currentEndpoint = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var sissvocRenderResourceLinks = true;
 
 //this searches Concepts defined in a sissvoc endpoint by 'q' string 
 // fnProcessConcepts is a function that does something with the returned json
@@ -30,6 +31,15 @@ var getCollections = function(pageSize, currPage) {
 	);
 };
 
+//this gets all the collections defined in a sissvoc endpoint by 'q' string 
+// fnProcessCollections is a function that does something with the returned json
+var getResource = function(uri) {
+    var url = currentEndpoint + '/resource.json?uri=' + uri;
+    $.get( url, function(data) {
+	   return data;
+	}
+	);
+};
 
 
 var processMultilingualLabel = function (labelObj) {
@@ -188,9 +198,15 @@ var getLinkOrText = function (str, label, isMember) {
 		
 
 		if (label === undefined) {
+			if(sissvocRenderResourceLinks) {
+				return "<a href=\"" +currentEndpoint + "/resource?uri=" + String(str).replace('#', '%23') + "\">" + str + "</a>";
+			}
 			return "<a href=\"" + String(str).replace('#', '%23') + "\">" + str + "</a>";
         }
 		else {
+			if(sissvocRenderResourceLinks) {
+				return "<a href=\"" +currentEndpoint + "/resource?uri=" + String(str).replace("#", '%23') + "\">" + label + "</a>";
+			}
 			return "<a href=\"" + String(str).replace("#", '%23') + "\">" + label + "</a>";
 		}
 	} else {
@@ -207,7 +223,9 @@ var renderSearchResultItem = function (uri, label, data) {
 	//var newdiv = document.createElement( "div" ).addClass("res");
 	var newdiv = $('<div/>')
 		.addClass("res");
-	newdiv.append("<h3 class='title'><a href=\"" + uri.replace('#', '%23') + "\" target='out'>" + label + "</a></h3>");
+	var resourceEndpoint = currentEndpoint + "/resource?uri=" + uri.replace('#', '%23');
+	
+	newdiv.append("<h3 class='title'><a href=\"" + resourceEndpoint + "\" target='out'>" + label + "</a></h3>");
 	
 	newdiv.append("<div class='dispUri'>" + getLinkOrText(uri) + "</div>");
 	
