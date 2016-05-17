@@ -405,39 +405,6 @@ function prepareToShowDetail(resourceUri, itemDetails, node){
 	var details = renderSearchResultItem(resourceUri, processSkosLabel(prefLabel), itemDetails);
 	$('#content').append(details);
 }
-/**
- *  Prepare data to be inserted in array. This is just a workaround
- */
-
-var data_processed = {};
-
-$.get(
-    currentEndpoint + "/" + conceptschemeOrCollection + ".json?_page=0&_pageSize=50",
-    {},
-    prepareData
-);
-
-function prepareData(data){
-    var vocab_name = baseName(currentEndpoint);
-
-	var data_processed = {'name': vocab_name, 'children': []};
-
-	for(var i = 0; i < data['result']['items'].length; i++){
-		var child = navigate(data['result']['items'][i]);
-		if (child != null){
-			data_processed['children'].push(child);
-		}else{
-			//console.log(data['result']['items'][i]);
-		}
-	}
-
-
-
-	//console.dir(data_processed);
-	initialise(data_processed, null);
-
-
-}
 
 /**
  * Recursive function which navigates the objects trying to find children
@@ -646,6 +613,29 @@ function reloadSissvoc() {
 	console.log("sissvoc reloaded with " + currentEndpoint + " and " + conceptschemeOrCollection)    ;
 }
 
+function prepareData(data){
+    var vocab_name = baseName(currentEndpoint);
+
+	var data_processed = {'name': vocab_name, 'children': []};
+
+	for(var i = 0; i < data['result']['items'].length; i++){
+		var child = navigate(data['result']['items'][i]);
+		if (child != null){
+			data_processed['children'].push(child);
+		}else{
+			//console.log(data['result']['items'][i]);
+		}
+	}
+
+
+
+	//console.dir(data_processed);
+	initialise(data_processed, null);
+
+
+}
+
+
 $( document ).ready(function() {
     $("#sissvoc-endpoint-input").val(currentEndpoint);	
 	
@@ -679,6 +669,21 @@ $( document ).ready(function() {
 		conceptschemeOrCollection = this.value;
         reloadSissvoc();
     });
+	
+	
+	/**
+    *  Prepare data to be inserted in array. This is just a workaround
+    */
+
+    var data_processed = {};
+
+    $.get(
+        currentEndpoint + "/" + conceptschemeOrCollection + ".json?_page=0&_pageSize=50",
+        {},
+        prepareData
+    );
+
+
 
 });
 
