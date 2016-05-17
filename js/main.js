@@ -1,5 +1,7 @@
-var CURRENTENDPOINT = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var currentEndpoint = 'http://sissvoc.ereefs.info/sissvoc/ereefs';
+var conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or collection
 var details_opened = true;
+var MAX_LABEL_LENGTH = 50;
 var input;
 /**
  * Function to hide or show the details tab on the right
@@ -363,7 +365,7 @@ function click(d){
 		var resourceUri = d.about;
 		
 		var promise = $.ajax({
-					url : CURRENTENDPOINT + "/resource.json",
+					url : currentEndpoint + "/resource.json",
 					data : {
 						uri : resourceUri,
 						_view : "all"
@@ -398,38 +400,6 @@ function prepareToShowDetail(resourceUri, itemDetails, node){
 	var details = renderSearchResultItem(resourceUri, processSkosLabel(prefLabel), itemDetails);
 	$('#content').append(details);
 }
-/**
- *  Prepare data to be inserted in array. This is just a workaround
- */
-
-var data_processed = {};
-
-$.get(
-    "http://sissvoc.ereefs.info/sissvoc/ereefs/collection.json?_page=0&_pageSize=50",
-    {},
-    prepareData
-);
-
-function prepareData(data){
-
-	var data_processed = {'name': 'eReefs', 'children': []};
-
-	for(var i = 0; i < data['result']['items'].length; i++){
-		var child = navigate(data['result']['items'][i]);
-		if (child != null){
-			data_processed['children'].push(child);
-		}else{
-			//console.log(data['result']['items'][i]);
-		}
-	}
-
-
-
-	//console.dir(data_processed);
-	initialise(data_processed, null);
-
-
-}
 
 /**
  * Recursive function which navigates the objects trying to find children
@@ -440,51 +410,112 @@ function prepareData(data){
 function navigate(object){
 	////console.dir(object);
 	if (typeof object === 'string' || object instanceof String){
-		return null;
+		var current_object = {'_about': object, 'children':[]};
+		//go off and fill in the details for current_object
+		var url = currentEndpoint + '/resource.json?uri=' + object;
+		$.get( url, function(data) {
+		   current_object =  addDetailsToNode(data.result.primaryTopic, current_object);
+		   collapseNode(current_object);
+		});
+		return current_object;
 	}
-	if ('prefLabel' in object){
-		
-		/**
-		 * Generate the name correctly depending if it is an array or an single string
-		 */
-		var name;
-		if (typeof object['prefLabel'] === 'string' || object['prefLabel'] instanceof String){
-			name = object['prefLabel'];
-		}else{
-			name = object['prefLabel'].join(', ');
+	var labelOrPreflabel = object.prefLabel ? object.prefLabel : object.label;
+	var name = processMultilingualLabel(labelOrPreflabel);
+        if(name) {
+	   var longname = name;
+   	   if(name.length > MAX_LABEL_LENGTH ) {
+	      name = name.substring(0,MAX_LABEL_LENGTH ) + "..."
+	   }  
+        }
+        else {
+           name = "";
+        }
+	var current_object = {'name': name, 'longname': longname, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
+	var url = currentEndpoint + '/resource.json?uri=' + object._about;
+	$.get( url, function(data) {
+	   current_object =  addDetailsToNode(data.result.primaryTopic, current_object);
+	   collapseNode(current_object);
+	});
+	
+	//current_object = addDetailsToNode(object, current_object);
+	
+	return current_object;
+}
+
+function addDetailsToNode(object, current_object) {
+	var name = null;
+	if ('prefLabel' in object || 'label' in object){	
+
+		if('prefLabel' in object) {
+			/**
+			 * Generate the name correctly depending if it is an array or an single string
+			 */
+			name = processSkosLabel(object['prefLabel'])
 		}
-
-		var current_object = {'name': name, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
-
+		else if('label' in object) {
+			/**
+			 * Generate the name correctly depending if it is an array or an single string
+			 */
+			name = processSkosLabel(object['label'])
+		}
+		
+		
+	
+		if(name != null) {
+		    var shortname = name;
+			if(name.length > MAX_LABEL_LENGTH ) {
+	           shortname = name.substring(0,MAX_LABEL_LENGTH ) + "..."
+	        }
+			current_object['name'] = shortname;
+			current_object['longname'] = name;
+		}
+		
 		/**
 		 * if the element has member (children), then it will call the method recursively
 		 * and then with the children done it will push the children and its children to
 		 * the array.
 		 */
+		if(current_object.children === 'undefined'  &&  current_object._children === 'undefined'){
+		   current_object.children = [];
+		}
+ 		var children = current_object.children ? current_object.children : current_object._children; 
+
 		if('member' in object){
 			for(var j = 0; j < object['member'].length; j++){
 				var child = navigate(object['member'][j]);
 				if (child !== null){
-					current_object['children'].push(child);	
+					children.push(child);	
 				}
 				
 			}
 		}
+		if('hasTopConcept' in object){
+			for(var j = 0; j < object['hasTopConcept'].length; j++){
+				var child = navigate(object['hasTopConcept'][j]);
+				if (child !== null){
+					children.push(child);	
+				}
+			}
+		}
+		if('narrower' in object){
+			for(var j = 0; j < object['narrower'].length; j++){
+				var child = navigate(object['narrower'][j]);
+				if (child !== null){
+					children.push(child);	
+				}
+			}
+		}
+		
 		if (current_object['children'].length == 0){
 			delete current_object['children'];
 		}else{
-			
-
 			current_object['children'] = cluster(current_object['children']);
 		}
-
-		return current_object;
-
-	}else{
-		//console.log(object);
-		return null 
+		//return current_object;
 	}
+	return current_object;
 }
+
 
 /**
  * Function to cluster information when there are too many children inside
@@ -539,5 +570,144 @@ function cluster(children){
 		return children;	
 	}
 	
+}
+
+
+function baseName(str)
+{
+   var base = new String(str).substring(str.lastIndexOf('/') + 1); 
+    if(base.lastIndexOf(".") != -1)       
+        base = base.substring(0, base.lastIndexOf("."));
+   return base;
+}
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+function isUrlValid(url) {
+    return /^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(url);
+}
+
+
+function reloadSissvoc() {
+	$.get(
+		currentEndpoint + "/" + conceptschemeOrCollection + ".json?_page=0&_pageSize=50",
+		{},
+		prepareData
+    );
+	console.log("sissvoc reloaded with " + currentEndpoint + " and " + conceptschemeOrCollection)    ;
+}
+
+var data_processed = {};
+
+
+function prepareData(data){
+    var vocab_name = baseName(currentEndpoint);
+
+	var data_processed = {'name': vocab_name, 'children': []};
+
+	for(var i = 0; i < data['result']['items'].length; i++){
+		var child = navigate(data['result']['items'][i]);
+		if (child != null){
+			data_processed['children'].push(child);
+		}else{
+			//console.log(data['result']['items'][i]);
+		}
 	}
+
+
+
+	//console.dir(data_processed);
+	initialise(data_processed, null);
+
+
+}
+
+
+$( document ).ready(function() {
+    $("#sissvoc-endpoint-input").val(currentEndpoint);	
+	
+	//update if there are any get parameters
+	var endpoint = getUrlParameter('endpoint');
+	if(endpoint) {
+		console.log("endpoint found: " + endpoint);
+		if(isUrlValid(endpoint)) {
+		   $("#sissvoc-endpoint-input").val(endpoint);				
+		   currentEndpoint = endpoint;
+		}
+	}	
+
+	var skosview = getUrlParameter('view');
+   	if(skosview) {
+		console.log("skosview found: " + skosview);
+		conceptschemeOrCollection = skosview;
+		//reset buttons
+		if ($('#skosview_conceptscheme').hasClass('active')) {
+            $('#skosview_conceptscheme').remove('active');
+        }
+		else if($('#skosview_collection').hasClass('active')) {
+		   $('#skosview_collection').remove('active');
+	    }
+		
+		if(skosview == "collection") {
+			$('#skosview_collection').addClass('active');
+		}
+		else {
+			$('#skosview_conceptscheme').addClass('active');
+		}
+	}	else {
+       conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or collection
+	   $('#skosview_conceptscheme').addClass('active');
+	}
+
+	
+	$('#sissvoc-endpoint-update-btn').on('click', function(e){
+        e.preventDefault(); // prevent the default click action
+    
+        console.log("sissvoc endpoint update clicked")    ;
+		currentEndpoint = $("#sissvoc-endpoint-input").val();
+	    reloadSissvoc();	
+	});
+	
+	$('input[type=radio][name=sissvoc-view]').change(function() {
+		
+        if (this.value == 'conceptscheme') {
+            console.log("changing sissvoc view to concept-scheme based");
+		}
+        else if (this.value == 'collection') {
+            console.log("changing sissvoc view to collection-based");			
+        }
+		conceptschemeOrCollection = this.value;
+        reloadSissvoc();
+    });
+	
+	
+	/**
+    *  Prepare data to be inserted in array. This is just a workaround
+    */
+
+
+    $.get(
+        currentEndpoint + "/" + conceptschemeOrCollection + ".json?_page=0&_pageSize=50",
+        {},
+        prepareData
+    );
+
+
+
+});
+
+
 

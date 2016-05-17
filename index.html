@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <head>
 	<meta charset="utf-8">
-	<title>eReefs - Explorer</title>
+	<title>SISSVoc Explorer</title>
 
 	<link rel="stylesheet" href="css/style.css" />
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 </head>
 
 <body>
-	
 	<div id="details" class="">
 		<div class="input-group" style="position: absolute;">
 			<input type="text" id="filter" class="form-control" autocomplete="off" placeholder="Filter the elements">
@@ -23,17 +22,48 @@
 		<!-- <input type="search" class="form-control" id="filter" placeholder="Type to filter elements: e.g. Chlorophyle" /> -->
 		<h2>Details</h2>
 		<div id="content">
-			<p>The visualisation on the left will help you to <strong>explore</strong> all the features and information available in eReefs</p>
+			<p>The visualisation on the left will help you to <strong>explore</strong> all the features and information available for the selected <a href="http://www.sissvoc.info">SISSVoc</a> endpoint.</p>
 
-			<p><strong>eReefs</strong> is an project developed by CSIRO and aims to address all the information related to the Great Barrier Reef.</p>
+			<p>The <strong>SISSVoc Vocabulary Visualisation</strong> demonstrator has been developed by <a href="http://www.csiro.au">CSIRO</a> and aims to help users understand and explore the concepts in a given <a href="http://www.sissvoc.info">SISSVoc</a> endpoint.</p>			
+			
+			<p>The buttons to the left allow updating of the <a href="http://www.sissvoc.info">SISSVoc</a> endpoint and also visualisation of based on either SKOS <a href="https://www.w3.org/TR/skos-reference/#schemes">concept schemes</a> or <a href="https://www.w3.org/TR/skos-reference/#collections">collections</a>.</p>
 			
 		</div>
 
 		<button id="arrow"/>
 	</div>
 	<div id="visualisation">
-		
+	   <div id="sissvoc-inputs" style="padding-top: 10px; padding-left: 5px">	
+	      <div class="row">
+			  <div class="col-lg-6">
+				<div class="input-group">
+				  <input id="sissvoc-endpoint-input" type="text" class="form-control" value="">
+				  <span class="input-group-btn">
+					<button id="sissvoc-endpoint-update-btn" class="btn btn-default" type="button">Update</button>
+				  </span>
+				</div><!-- /input-group -->
+			  </div><!-- /.col-lg-6 -->			  
+ 			  <div class="col-lg-4">							
+				<div id="sissvoc-viewtype" class="btn-group" data-toggle="buttons">
+					<label  id="skosview_conceptscheme" class="btn btn-default ">
+						<input name="sissvoc-view" value="conceptscheme" type="radio">Concept Scheme view
+					</label>
+					<label id="skosview_collection" class="btn btn-default">
+						<input name="sissvoc-view" value="collection" type="radio">Collection view
+					</label>
+				</div>
+		    </div>
+		  </div>	
+	   </div>	   	
 	</div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">&copy; <a href="http://www.csiro.au">CSIRO</a> 2016. Contact <a href="http://people.csiro.au/Jonathan-Yu">Jonathan Yu</a> for more details.</p>
+      </div>
+    </footer>
+
+
 	<!-- Main.js will use d3.js to create the visualisation -->
 	<!-- which will be added to the body as an SVG element -->
 
@@ -43,8 +73,7 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/main.js"></script>
 	<script src="js/sissvoc.js"></script>
-	<script src="js/ereefs-search.js"></script>
-
+	
 
 </body>
 </html>
