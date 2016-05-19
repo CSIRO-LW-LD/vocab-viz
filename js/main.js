@@ -5,6 +5,8 @@ var details_opened = true;
 var MAX_LABEL_LENGTH = 50;
 var input;
 var data_processed = {};
+var enable_lookahead = false;
+var arrDeferred = [];
 
 var margin = {top: 20, right: 30, bottom: 20, left: 100},
     width = 1350 - margin.right - margin.left,
@@ -438,10 +440,19 @@ function navigate(object){
         }
 	var current_object = {'name': name, 'longname': longname, 'about': object['_about'], 'children': []}; // creates new object to receive the elements
 	var url = currentEndpoint + '/resource.json?uri=' + object._about;
-	$.get( url, function(data) {
-	   current_object =  addDetailsToNode(data.result.primaryTopic, current_object);
-	   collapseNode(current_object);
-	});
+	var jqxhr = $.get( url, function(data) {
+
+		   current_object =  addDetailsToNode(data.result.primaryTopic, current_object);
+		   collapseNode(current_object);
+		}).done(function() {
+			console.log('done ');
+			
+			//updateTree();
+		}).always(function() {
+			console.log('finished');
+		});
+		
+		arrDeferred.push(jqxhr);
 	
 	//current_object = addDetailsToNode(object, current_object);
 	
@@ -633,8 +644,14 @@ function prepareData(data){
 
 
 
-	//console.dir(data_processed);
-	initialise(data_processed, null);
+
+
+    $.when.apply(null, arrDeferred).done(function() {
+        console.log("All deferreds done!");
+   		//console.dir(data_processed);
+	    initialise(data_processed, null);
+
+    });
 
 
 }
