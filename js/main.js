@@ -12,6 +12,13 @@ var margin = {top: 20, right: 30, bottom: 20, left: 100},
     width = 1350 - margin.right - margin.left,
     height = 900 - margin.top - margin.bottom;
 
+var sissvoc_endpoints = {};
+sissvoc_endpoints["pizza"] =  {"label": "Pizza SKOS", "endpoint": "http://demo.sissvoc.info/sissvoc/pizza", "view":"conceptscheme"};
+sissvoc_endpoints["soil"] =   {"label": "CSIRO Soils", "endpoint": "http://demo.sissvoc.info/sissvoc/soils", "view": "collection"};
+sissvoc_endpoints["wesc"] =   {"label": "Water/Energy Consumption Supply", "endpoint": "http://wescml.org/sissvoc/vocab", "view": "collection"}; 
+sissvoc_endpoints["urbanwater"] =   {"label": "Urban Water codes", "endpoint": "http://demo.sissvoc.info/sissvoc/uwdc", "view": "conceptscheme"};
+ 
+	
 
 /**
  * Function to hide or show the details tab on the right
@@ -656,6 +663,34 @@ function prepareData(data){
 
 }
 
+function setSissvocEndpoint(endpoint, view) {
+	currentEndpoint = endpoint;
+	setEndpointInputText(endpoint);
+	setSissvocView(view);	
+}
+
+function setEndpointInputText(newEndpoint) {
+	$("#sissvoc-endpoint-input").val(newEndpoint);	
+}
+
+function setSissvocView(skosview) {
+	conceptschemeOrCollection = skosview;
+	//reset buttons
+	if ($('#skosview_conceptscheme').hasClass('active')) {
+		$('#skosview_conceptscheme').removeClass('active');
+	}
+	else if($('#skosview_collection').hasClass('active')) {
+	   $('#skosview_collection').removeClass('active');
+	}
+	
+	if(skosview == "collection") {
+		$('#skosview_collection').addClass('active');
+	}
+	else {
+		$('#skosview_conceptscheme').addClass('active');
+	}
+	
+}
 
 $( document ).ready(function() {
     $("#sissvoc-endpoint-input").val(currentEndpoint);	
@@ -673,21 +708,7 @@ $( document ).ready(function() {
 	var skosview = getUrlParameter('view');
    	if(skosview) {
 		console.log("skosview found: " + skosview);
-		conceptschemeOrCollection = skosview;
-		//reset buttons
-		if ($('#skosview_conceptscheme').hasClass('active')) {
-            $('#skosview_conceptscheme').remove('active');
-        }
-		else if($('#skosview_collection').hasClass('active')) {
-		   $('#skosview_collection').remove('active');
-	    }
-		
-		if(skosview == "collection") {
-			$('#skosview_collection').addClass('active');
-		}
-		else {
-			$('#skosview_conceptscheme').addClass('active');
-		}
+		setSissvocView(skosview)
 	}	else {
        conceptschemeOrCollection = "conceptscheme"; //choose conceptscheme or collection
 	   $('#skosview_conceptscheme').addClass('active');
@@ -714,6 +735,11 @@ $( document ).ready(function() {
         reloadSissvoc();
     });
 	
+	$.each(sissvoc_endpoints, function(key, val) {
+		$("#sissvoc_endpoint_dropdown").append('<li><a data-key="'+ key +'" href="#">' + val['label'] + '</li>');
+
+	});
+	
 	
 	/**
     *  Prepare data to be inserted in array. This is just a workaround
@@ -725,8 +751,18 @@ $( document ).ready(function() {
         {},
         prepareData
     );
-
-
+	
+	
+	
+	$("ul.dropdown-menu a").click(function(ev) {
+//	$(".dropdown-menu").on("show.bs.dropdown", function(event){
+		var x = $(ev.currentTarget).text(); // Get the text of the element
+		var key = $(this).data('key');
+		//alert(x + " " + key + " " + sissvoc_endpoints[key].endpoint);
+		console.log("Setting sissvoc: " + x + " " + key + " " + sissvoc_endpoints[key].endpoint + " " +  sissvoc_endpoints[key].view);
+		setSissvocEndpoint(sissvoc_endpoints[key].endpoint, sissvoc_endpoints[key].view);
+		reloadSissvoc();
+	});
 
 });
 
