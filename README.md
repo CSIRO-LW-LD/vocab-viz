@@ -8,3 +8,5 @@ In referencing this software package, please use the following DOI and citation:
 * Citation: Yu, Jonathan; Iacovelli, Douglas; Li, Yuan-Fang; Cox, Simon (2017): SISSVoc Vocabulary Viz Tool. v1. CSIRO. Software Collection. 10.4225/08/5a0520c99bddd
 
 See http://www.sissvoc.info for more details about SISSVoc.
+
+Demo here: http://www.sissvoc.info/visualise/
